@@ -76,23 +76,32 @@ class _VypocetSpotrebyState extends State<VypocetSpotreby> { //Controllery ukád
   final TextEditingController vzdalenostController = TextEditingController();
   final TextEditingController cenaPalivaController = TextEditingController();
   final TextEditingController prumernaSpotrebaController = TextEditingController();
+  final TextEditingController pocetOsobController = TextEditingController();
   String vysledek = '';
   
   void pocitaniSpotreby() { //prevod textu (Stringu) na cislo (double)
     final vzdalenost = double.tryParse(vzdalenostController.text);
     final cenaPaliva = double.tryParse(cenaPalivaController.text);
     final prumernaSpotreba = double.tryParse(prumernaSpotrebaController.text);
+    final pocetOsob = double.tryParse(pocetOsobController.text);
     
-    if (vzdalenost != null && cenaPaliva != null && prumernaSpotreba != null) {
+    if (vzdalenost != null && cenaPaliva != null && prumernaSpotreba != null && pocetOsob != null) {
       final pouzitePalivo = (vzdalenost * prumernaSpotreba) / 100; // Vypocet spotreby paliva
       final konecnaCena = pouzitePalivo * cenaPaliva; // Vypocet nakladu
+      final cenaNaJednoho = konecnaCena / pocetOsob; //Vypocet na jednoho cloveka
       setState(() {
-        vysledek = 'Celková cena: ${konecnaCena.toStringAsFixed(2)}';
+        vysledek = 'Celková cena: ${konecnaCena.toStringAsFixed(2)} \nCena na jednoho: ${cenaNaJednoho.toStringAsFixed(2)}';
       });
+      vzdalenostController.clear();
+      cenaPalivaController.clear();
+      prumernaSpotrebaController.clear();
+      pocetOsobController.clear();
     } else {
-      setState(() {
-        vysledek = 'Chyba: zadejte platná čísla';
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Zadejte platná čísla!', style: TextStyle(fontSize: 16,)),
+        ),
+      );
     }
   }
   
@@ -125,6 +134,15 @@ class _VypocetSpotrebyState extends State<VypocetSpotreby> { //Controllery ukád
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             labelText: 'Průměrná spotřeba (l/100 km)',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        SizedBox(height: 10),
+        TextField(
+          controller: pocetOsobController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: 'Počet osob',
             border: OutlineInputBorder(),
           ),
         ),
